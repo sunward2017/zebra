@@ -1,0 +1,176 @@
+import React, { PureComponent } from 'react';
+import { Form, Input, Tooltip, Icon,  Button, Upload , DatePicker, Spin, Popconfirm } from 'antd';
+import servers from '@/server'
+import Ueditor from '../../../common/Ueditor'
+import UploadImg from '@/common/UploadImg'
+
+const FormItem = Form.Item;
+const { TextArea } = Input;
+
+
+class RegistrationForm extends PureComponent {
+    constructor(props) {
+        console.log("props");
+        console.log(props);
+        super(props);
+        this.state={
+            action:'',
+            url:'',
+            fileList:[
+                {
+                    uid: -1,
+                    name:'',
+                    url:'',
+                }],
+        }
+    }
+
+    handleSubmit = (e) =>{
+        e.preventDefault();
+        this.props.form.validateFieldsAndScroll((err, values) => {
+            console.log("form--values");
+            console.log(values);
+            if (!err) {
+                let { modifyDayWorkRecoder } = this.props;
+                modifyDayWorkRecoder(values);
+            }
+        });
+    };
+
+    onChange = (date, dateString) =>{
+        console.log(date, dateString);
+    };
+
+    render(){
+        const { operate, content, id ,customId, imgUuid } = this.props;
+        const account = this.props.account;
+        const { isLoading } = this.props;
+        const { getFieldDecorator } = this.props.form;
+        const formItemLayout = {
+            labelCol: {
+                xs: { span: 24 },
+                sm: { span: 4 },
+            },
+            wrapperCol: {
+                xs: { span: 24 },
+                sm: { span: 16 },
+            },
+        };
+        const tailFormItemLayout = {
+            wrapperCol: {
+                xs: {
+                    span: 24,
+                    offset: 0,
+                },
+                sm: {
+                    span: 16,
+                    offset: 8,
+                },
+            },
+        };
+
+        const uploadButton = (
+            <div>
+                <Button >
+                    <Icon type="upload" /> 上传
+                    {/*<div className="ant-upload-text">Upload</div>*/}
+                </Button>
+            </div>
+        );
+
+        return(
+
+            <div style={{marginTop:1 ,height:'100%'}}>
+
+                <h1 style={{align:'center'}}>施工单</h1>
+                {isLoading ? <Spin /> :
+                    <Form>
+                        <FormItem
+                            {...formItemLayout}
+                            label="记录人"
+                        >
+                            {getFieldDecorator('account', {
+                                rules: [],
+                                initialValue: account
+                            })(
+                                <Input style={{ width: '100%' }} disabled />
+                            )}
+                        </FormItem>
+                        <FormItem
+                            {...formItemLayout}
+                            label="用户ID"
+                        >
+                            {getFieldDecorator('customId', {
+                                rules: [{
+                                    required: true, message: '请输入用户ID',
+                                }],
+                                initialValue: customId
+                            })(
+                                <Input style={{ width: '100%' }} disabled/>
+                            )}
+                        </FormItem>
+                        <FormItem
+                            {...formItemLayout}
+                            label="操作"
+                        >
+                            {getFieldDecorator('operate', {
+                                rules: [{
+                                    required: true, message: '请输入勘察人员',
+                                }],
+                                initialValue: operate
+                            })(
+                                <Input style={{ width: '100%' }} />
+                            )}
+                        </FormItem>
+
+
+                        <FormItem
+                            {...formItemLayout}
+                            label="勘察内容"
+                        >
+                            {getFieldDecorator('content', {
+                                rules: [{ required: true, message: '请输入勘察内容', whitespace: true }],
+                                initialValue: content,
+                            })(
+                                <Ueditor />
+                            )}
+                        </FormItem>
+                        <FormItem
+                            {...tailFormItemLayout}
+                        >
+                            <UploadImg imgUuid={imgUuid} title="施工图片上传" />
+                        </FormItem>
+                        <FormItem {...tailFormItemLayout}>
+                            <Button type='primary' onClick={(e) => { this.handleSubmit(e) }} style={{ marginRight: 8 }} loading={this.state.subLoading}> 提交</Button>
+                            <Popconfirm title="确定删除" onConfirm={() => this.handleDelete()}>
+                                <Button type="primary" loading={this.state.delLoading} disabled={!id}>删除</Button>
+                            </Popconfirm>
+                        </FormItem>
+                    </Form>}
+
+            </div>
+        );
+    }
+}
+
+// const WorkBillForm = Form.create({})(RegistrationForm);
+
+const WorkBillForm = Form.create({
+    onFieldsChange(props, changedFields) {
+        props.onChange(changedFields);
+    },
+    mapPropsToFields(props) {
+        let cusProps = {};
+        for (var k in props) {
+            cusProps[k] = Form.createFormField({
+                ...props[k],
+                value: props[k].value,
+            })
+        }
+        return cusProps;
+    }
+})(RegistrationForm);
+
+
+
+export default WorkBillForm;
