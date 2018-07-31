@@ -1,0 +1,43 @@
+//import  "babel-polyfill";
+//import 'promise-polyfill';
+//import 'whatwg-fetch';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+import registerServiceWorker from './registerServiceWorker';
+
+
+import { Router, Route, IndexRoute, browserHistory } from 'react-router';
+
+import 'antd/dist/antd.min.css';
+import './asset/theme/default.css';
+
+import store from './store'
+import routes from './container/routes'
+import App from './container/app.js';
+import Login from './components/Login';
+import 'moment/locale/zh-cn';
+
+const checkAuth = (nextState, replace, next) => {
+  let { user } = store.getState().auth
+  if (user) {
+    next();
+  } else {
+    browserHistory.push('/login')
+  }
+}
+ReactDOM.render(
+  <Provider store={store}>
+    <Router history={browserHistory}>
+      <Route path='/login' component={Login} />
+      <Route path='/' component={App} onEnter={checkAuth}>
+        {
+           routes.map((route,index)=>(<Route path={route.path} key={index} getComponent={route.component} />))
+        }
+      </Route>
+    </Router>
+  </Provider>
+  ,
+  document.getElementById('root')
+);
+registerServiceWorker();

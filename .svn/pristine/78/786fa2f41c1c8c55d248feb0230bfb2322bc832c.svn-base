@@ -1,0 +1,257 @@
+import React, {PureComponent} from 'react';
+import {Select} from 'antd';
+import { Calendar , Badge, notification,TreeSelect } from 'antd';
+import { connect } from 'react-redux';
+import servers from '@/server'
+import {getToken} from '@/utils/auth'
+
+const Option = Select.Option;
+const TreeNode = TreeSelect.TreeNode;
+
+export default class WorkCalendar extends PureComponent {
+    constructor(props){
+        super(props);
+        console.log("workCalender---constructor");
+        console.log(props);
+        this.state={
+            listData:[],
+            districValue:undefined,
+            treeNodeData:[],
+            crossingList:[],
+            zebraCrossingList:[],
+            customerId: '',
+        };
+    }
+//    函数
+    componentDidMount(){
+        this.getListData();
+        this.getInitial();
+        this.getDistrictTree();
+    };
+
+    getInitial(){
+        this.token = getToken();
+        // console.log("getToken");
+        // console.log(this.token.session);
+        this.session = this.token.session;
+        this.account = this.token.account;
+        this.customerId = this.token.customerId;
+        // console.log(this.token);
+    }
+
+    //拿到地区目录
+    getDistrictTree = () => {
+        let customerId = this.customerId;
+        servers.getAreaInfoTree({ customerId: this.customerId}).then(res => {
+            if (res.result === 200) {
+                // if(res.data){
+                //     console.log("res.data");
+                //     console.log(res.data);
+                // }
+                res.data ? this.setState({ treeNodeData: res.data.areaInfoList }) : this.setState({ treeNodeData: [] });
+                // console.log("treeNodeData");
+                // console.log(this.state.treeNodeData);
+            } else {
+                this.noticeErrInfo(res);
+            }
+        }).catch(
+            err => { console.log(err) }
+        )
+    };
+    //拿到路口
+    getCrossingList = (nodeData) => {
+        servers.getRoadSetInfoList(nodeData).then(res => {
+            // console.log('list data:',res);
+            if (res.result === 200) {
+                res.data ? this.setState({ crossingList: res.data }) : this.setState({ crossingList: [] });
+                // console.log("crossingList");
+                // console.log(this.state.crossingList);
+            } else {
+                this.noticeErrInfo(res);
+            }
+        }).catch(
+            err => { console.log(err) }
+        )
+    };
+    //拿到斑马线
+    getZebraCrossingList = (data) => {
+        servers.getBanMaLineListinfo(data).then(res => {
+            console.log('zebra list data:',res);
+            if (res.result === 200) {
+                res.data ? this.setState({ zebraCrossingList: res.data }) : this.setState({ zebraCrossingList: [] });
+                // console.log("zebraCrossingList");
+                // console.log(this.state.zebraCrossingList);
+            } else {
+                this.noticeErrInfo(res);
+            }
+        }).catch(
+            err => { console.log(err) }
+        )
+    };
+    //选中地区节点，获取路口节点
+    onSelectTreeNode=(value,node, extra)=>{
+        this.getCrossingList({areaId:node.props.dataRef.cityId,id:node.props.dataRef.id,customerId:node.props.dataRef.customerId})
+        this.setState({districValue:value});
+    };
+    //渲染树结构
+    renderTreeNodes = (data) => {
+        return data.map((item) => {
+            if (item.areaInfoList) {
+                return (
+                    <TreeNode title={item.cityName} key={item.id} value={item.cityName} dataRef={item} >
+                        {this.renderTreeNodes(item.areaInfoList)}
+                    </TreeNode>
+                );
+            }
+            return <TreeNode title={item.cityName} key={item.id}  dataRef={item}/>;
+        });
+    };
+    //渲染路口结构
+    getSelectOptions = (data) =>{
+        // console.log("getSelectOptions");
+        return data.map((item) =>{
+            return(
+                <Option value={item.roadName} key={item.id}>{item.roadName}</Option>
+            )
+        })
+    };
+    //渲染斑马线
+    getZebraSelectOptions = (data) =>{
+        // console.log("getZebraSelectOptions");
+        // console.log(data);
+        return data.map((item) =>{
+            return(
+                <Option value={item.zebracrossingName} key={item.id}>{item.zebracrossingName}</Option>
+            )
+        })
+    };
+    //选择路口
+    onSelectCrossing= (data,option) =>{
+        // console.log("onSelectCrossing");
+        const corssingList =this.state.crossingList;
+        corssingList.map((item) =>{
+            if(item.roadName===data){
+                const roadId = item.id;
+                const customerId = item.customerId;
+                console.log(roadId,customerId);
+                this.getZebraCrossingList({roadId:roadId, customerId:customerId});
+            }
+        })
+    };
+
+    getListData111=(value) =>{
+        let listData;
+        switch (value.date()) {
+            case 8:
+                listData = [
+                    { type: 'warning', content: '' },
+                    { type: 'success', content: '' },
+                ]; break;
+            case 10:
+                listData = [
+                    { type: 'warning', content: '' },
+                    { type: 'success', content: '' },
+                    { type: 'error', content: '' },
+                ]; break;
+            case 15:
+                listData = [
+                    { type: 'warning', content: '' },
+                    { type: 'success', content: '' },
+                    { type: 'error', content: '' },
+                    { type: 'error', content: '' },
+                    { type: 'error', content: '' },
+                    { type: 'error', content: '' },
+                ]; break;
+            default:
+        }
+        return listData || [];
+    };
+
+    getListData=()=>{
+        console.log("getListData");
+        let { zebracrossingId } = this.props;
+        // servers.getProjectProgress({ zebracrossingId: zebracrossingId }).then(res => {
+        servers.getProjectProgress({ }).then(res => {
+            console.log(res);
+            if (res.result == 200) {
+                console.log()
+                console.log(res.data);
+                res.data ? this.setState({ listData: res.data }) : this.setState({ listData: [] });
+            } else {
+                const args = {
+                    message: '通信失败',
+                    description: res.message,
+                    duration: 2,
+                };
+                notification.error(args);
+            }
+        }).catch(
+            err => { console.log(err) }
+        )
+    };
+
+    dateCellRender=()=> {
+        // const listData = this.getListData;
+        return (
+            <div>
+                {
+                    this.state.listData.map(item => (
+                            <Badge  status={item.type} text={item.content} />
+                    ))
+                }
+            </div>
+        );
+    };
+
+    handleChange=(value) => {
+        console.log("handleChange");
+    };
+
+//    render函数
+    render(){
+
+        return (
+            <div style={{marginTop:10 }}>
+                <h1>施工日历</h1>
+                <span style={{marginRight: 10}}>
+                    <TreeSelect
+                        style={{ width: 300 }}
+                        value={this.state.districValue}
+                        dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                        placeholder="Please select"
+                        treeDefaultExpandAll
+                        onSelect={this.onSelectTreeNode}
+                        // onChange = {this.onChangeTree}
+                    >
+                        {
+                            this.renderTreeNodes(this.state.treeNodeData)
+                        }
+                    </TreeSelect>
+                </span>
+                <span style={{marginRight: 10}}>
+                     <Select initialValue="路口" style={{ width: 200 }} onSelect={this.onSelectCrossing}>
+                         {
+                             this.getSelectOptions(this.state.crossingList)
+                         }
+
+                </Select>
+                </span>
+                <span style={{marginRight: 10}}>
+                <Select initialValue="斑马线" style={{ width: 200 }} onSelect={this.handleChange}>
+                    {
+                        this.getZebraSelectOptions(this.state.zebraCrossingList)
+                    }
+                </Select>
+                </span>
+
+
+
+
+                <div style={{marginTop:10 }}>
+                <Calendar dateCellRender={this.dateCellRender} />
+                </div>
+            </div>
+        )
+    };
+}
+

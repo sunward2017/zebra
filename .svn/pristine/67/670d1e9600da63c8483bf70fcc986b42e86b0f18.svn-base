@@ -1,0 +1,280 @@
+import React, { Component } from 'react';
+import { Map, MapvLayer } from 'react-bmap';
+import { Row, Col, Tabs, Divider, Button, Icon, BackTop, notification } from 'antd';
+import citys from '@/asset/data/citys'
+import './style.css'
+import Swiper from 'swiper'
+import servers from '@/server'
+import 'swiper/dist/css/swiper.min.css'
+
+import SearchForm from './searchForm'
+import Cars from './carFlow'
+import Peoples from './peopleFlow'
+import Times from './times'
+import Lights from './light'
+
+const TabPane = Tabs.TabPane;
+ 
+
+export class dashBoard extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            onRankListData: [],
+            timesRankListData: [],
+            markers: [{ "geometry": { "type": "Point", "coordinates": [120.160738, 30.280761] } }, { "geometry": { "type": "Point", "coordinates": [120.117385, 30.274305] } }],
+            curCity: '',
+            xAxis: [],
+            carYAxis: [],
+            peopleYAxis: [],
+            zebraCitys: []
+        }
+    }
+    componentDidMount() {
+        var swiper = new Swiper('.swiper-container', {
+            //direction: 'vertical',
+            loop: true,
+            slidesPerView: 1,
+            mousewheel: true,
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            speed: 1500,
+            autoplay: {
+                delay: 3000
+            }
+        });
+        this.getArea();
+    }
+    getArea() {
+         let _this = this;
+        servers.getAreaInfoTree().then(res => {
+            if (res.result === 200) {
+                if (res.data) {
+                    let area = res.data.areaInfoList.map(item => { return { id: item.cityId, name: item.cityName } });
+                    _this.setState({ zebraCitys: area })
+                }
+            }
+        })
+    }
+    getResult = (params) => {
+        let curCity = this.state.zebraCitys.find(item => { if (item.id === params.cityId) return item }).name + '市';
+        this.setState({ curCity })
+        servers.getDevMonitorInfo(params).then(res => {
+            if (res.result === 200) {
+                let { data } = res;
+                let xAxis = [];
+                let carYAxis = [];
+                let peopleYAxis = [];
+                let onRankListData = [];
+                let timesRankListData = []
+
+                data && data.forEach(item => {
+                    xAxis.push(item.zebracrossingName);
+                    item.carCount ? carYAxis.push(item.carCount) : carYAxis.push(0);
+                    item.peopleCount ? peopleYAxis.push(item.peopleCount) : peopleYAxis.push(0);
+                    onRankListData.push(item)
+                    timesRankListData.push(item)
+                });
+                onRankListData.sort((p, n) => { return p.ledOnDuration > n.ledOnDuration })
+                timesRankListData.sort((p, n) => { return p.ledOnTimes > n.ledOnTimes })
+                this.setState({ xAxis, carYAxis, peopleYAxis, onRankListData, timesRankListData });
+            } else {
+                const args = {
+                    message: '监控接口故障',
+                    description: res.message,
+                    duration: 2,
+                };
+                notification.error(args);
+            }
+
+        })
+    }
+
+    render() {
+        let { curCity, xAxis, carYAxis, peopleYAxis, onRankListData, timesRankListData, zebraCitys } = this.state;
+        let coors = citys[curCity] ? citys[curCity].split(',') : citys['上海市'].split(',');
+
+        let { markers } = this.state;
+        const topColResponsiveProps = {
+            xs: 24,
+            sm: 12,
+            md: 12,
+            lg: 12,
+            xl: 6,
+            style: { marginTop: 24 },
+            content: { width: '80%', margin: '0 auto' }
+        };
+
+        const salesExtra = (
+            <div>
+                <Button type="primary" ghost>今日</Button>&emsp;
+                <Button type="primary" ghost>本周</Button>&emsp;
+                <Button type="primary" ghost>本月</Button>&emsp;
+                <Button type="primary" ghost>全年</Button>&emsp;
+            </div>
+        );
+
+        return (
+            <React.Fragment>
+                <Row gutter={16}>
+                    <Col span={20}>
+                        <Map
+                            center={{
+                                lng: coors[0],
+                                lat: coors[1]
+                            }}
+                            zoom='5'
+                            style={{ height: '400px' }}
+                            mapStyle={{ style: 'midnight' }}>
+                            <MapvLayer
+                                data={markers}
+                                options={{
+                                    fillStyle: 'rgba(255, 250, 50, 0.8)',
+                                    shadowColor: 'rgba(255, 250, 50, 0.3)',
+                                    shadowBlur: 30,
+                                    globalCompositeOperation: 'lighter',
+                                    size: 5,
+                                    draw: 'simple',
+                                    autoViewport: true,
+                                    viewportOptions: { zoomFactor: -3 }
+                                }}
+                            />
+                        </Map>
+
+                    </Col>
+                    <Col span={4}>
+                        <div className="swiper-container" ref={self => this.swiperID = self}>
+                            <div className="swiper-wrapper">
+                                <div className="swiper-slide">
+                                    <img src="http://img95.699pic.com/photo/00048/7515.jpg_wh860.jpg" alt="夜晚的十字路口图片" title="夜晚的十字路口" />
+                                </div>
+                                <div className="swiper-slide">
+                                    <img src="http://pic32.photophoto.cn/20140808/0040039573634997_b.jpg" alt="夜晚的十字路口图片" title="夜晚的十字路口" />
+                                </div>
+                                <div className="swiper-slide">
+                                    <img src="http://img95.699pic.com/photo/00048/7515.jpg_wh860.jpg" alt="夜晚的十字路口图片" title="夜晚的十字路口" />
+                                </div>
+                                <div className="swiper-slide">
+                                    <img src="http://pic32.photophoto.cn/20140808/0040039573634997_b.jpg" alt="夜晚的十字路口图片" title="夜晚的十字路口" />
+                                </div>
+                                <div className="swiper-slide">
+                                    <img src="http://img95.699pic.com/photo/00048/7515.jpg_wh860.jpg" alt="夜晚的十字路口图片" title="夜晚的十字路口" />
+                                </div>
+                                <div className="swiper-slide">
+                                    <img src="http://pic32.photophoto.cn/20140808/0040039573634997_b.jpg" alt="夜晚的十字路口图片" title="夜晚的十字路口" />
+                                </div>
+                                <div className="swiper-slide">
+                                    <img src="http://img95.699pic.com/photo/00048/7515.jpg_wh860.jpg" alt="夜晚的十字路口图片" title="夜晚的十字路口" />
+                                </div>
+                            </div>
+
+                            <div className="swiper-pagination"></div>
+
+                            {/* <div className="swiper-scrollbar"></div> */}
+                        </div>
+                    </Col>
+                </Row>
+                <div style={topColResponsiveProps.content}>
+                    <div style={topColResponsiveProps.style}>
+                        <h2>统计排行</h2>
+                        <Divider dashed />
+                        <Tabs defaultActiveKey="1" tabBarExtraContent={zebraCitys.length > 0 ? <SearchForm zebraCitys={zebraCitys}  handleGetResult={this.getResult} /> : ''}>
+                            <TabPane tab="车流量统计" key="1">
+                                <Row gutter={16}>
+                                    <Col xl={16} lg={12} md={12} sm={24} xs={24}>
+                                        <Cars xAxis={xAxis} carYAxis={carYAxis} />
+                                    </Col>
+                                    <Col xl={8} lg={12} md={12} sm={24} xs={24}>
+                                        <div className="salesRank">
+                                            <h4 className="rankingTitle">阶段亮灯时长排名</h4>
+                                            <ul className="rankingList">
+                                                {
+                                                    onRankListData.map((item, i) => (
+                                                        <li key={item.id}>
+                                                            <span className={(i < 3) ? 'active' : ''}>{i + 1}</span>
+                                                            <span>{item.zebracrossingName}</span>
+                                                            <span>{item.ledOnDuration} 小时</span>
+                                                        </li>
+                                                    ))
+                                                }
+                                            </ul>
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </TabPane>
+                            <TabPane tab="人流量统计" key="2">
+                                <Row gutter={16}>
+                                    <Col xl={16} lg={12} md={12} sm={24} xs={24}>
+                                        <Peoples xAxis={xAxis} peopleYAxis={peopleYAxis} />
+                                    </Col>
+                                    <Col xl={8} lg={12} md={12} sm={24} xs={24}>
+                                        <div className="salesRank">
+                                            <h4 className="rankingTitle">阶段亮灯次数排名</h4>
+                                            <ul className="rankingList">
+                                                {
+                                                    timesRankListData.map((item, i) => (
+                                                        <li key={item.id}>
+                                                            <span className={(i < 3) ? 'active' : ''}>{i + 1}</span>
+                                                            <span>{item.zebracrossingName}</span>
+                                                            <span>{item.ledOnTimes} 次</span>
+                                                        </li>
+                                                    ))
+                                                }
+                                            </ul>
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </TabPane>
+                        </Tabs>
+                    </div>
+
+                    <div style={topColResponsiveProps.style}>
+                        <h2>实时趋势</h2>
+                        <Divider dashed />
+
+                        <Tabs defaultActiveKey="1" tabBarExtraContent={salesExtra} size="large" >
+                            <TabPane tab="车流量趋势走势图" key="1">
+                                <Row gutter={16}>
+                                    <Col xl={6} lg={12} md={12} sm={24} xs={24}>
+                                        <h3>车流量本日累计次数统计</h3>
+                                        <p><span>4578车次</span>&emsp;&emsp;同比上涨<Icon type="caret-up" style={{ color: 'green' }} />12%</p>
+                                        <h3>车流量上日次数统计</h3>
+                                        <p><span>4578车次</span>&emsp;&emsp;环比上涨<Icon type="caret-down" style={{ color: 'red' }} />12%</p>
+                                    </Col>
+                                    <Col xl={18} lg={12} md={12} sm={24} xs={24}>
+                                        <Times />
+                                    </Col>
+                                </Row>
+
+                            </TabPane>
+                            <TabPane tab="人流量趋势走势图" key="2">
+                                <Row gutter={16}>
+                                    <Col xl={6} lg={12} md={12} sm={24} xs={24}>
+                                        <h3>人流量本日累计次数统计</h3>
+                                        <p><span>4578车次</span>&emsp;&emsp;同比下降<Icon type="caret-up" style={{ color: '#f00' }} />16%</p>
+                                        <h3>人流量上日次数统计</h3>
+                                        <p><span>4578车次</span>&emsp;&emsp;环比上涨<Icon type="caret-down" style={{ color: 'green' }} />12%</p>
+                                    </Col>
+                                    <Col xl={18} lg={12} md={12} sm={24} xs={24}>
+                                        <Lights />
+                                    </Col>
+                                </Row>
+                            </TabPane>
+                        </Tabs>
+
+
+                    </div>
+                    <BackTop>
+                        <div className="ant-back-top-inner"><Icon type="arrow-up" />回到顶部</div>
+                    </BackTop>
+                </div>
+            </React.Fragment>
+        )
+
+    }
+}
+
+
+ 

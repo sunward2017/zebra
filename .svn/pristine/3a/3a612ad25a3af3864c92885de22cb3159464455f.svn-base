@@ -1,0 +1,31 @@
+import React from 'react';
+import { connect } from 'react-redux';
+import { Layout, } from 'antd';
+import PlanMenu from './planMenu.js'
+import { LocaleProvider } from 'antd';
+import zh_CN from 'antd/lib/locale-provider/zh_CN';
+
+
+const { Content,Footer } = Layout
+
+let App = ({ load, children }) => {
+  return (
+    <Layout>
+      <PlanMenu load={load} />
+      <Content style={{ padding: '0 80px' }}>
+        <div style={{ background: '#fff', padding: 24, minHeight: 1000 }}>
+          <LocaleProvider locale={zh_CN}>{children}</LocaleProvider>
+        </div>
+      </Content>
+      <Footer style={{ textAlign: 'center' }}>
+        woosiyuan@2018
+      </Footer>
+    </Layout>
+  )
+}
+
+const auth = (state) => {
+  return { load: state.load.state }
+}
+
+export default connect(auth)(App);

@@ -1,0 +1,97 @@
+import React from 'react';
+import { connect } from 'react-redux';
+import { Table, notification, Button,Row, Col } from 'antd';
+import servers from '@/server'
+
+class versions extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      data:[],
+      addBtnFlag:false,
+    }
+  }
+  
+  componentDidMount() {
+    this.fetchVersionList();
+  }
+  
+  fetchVersionList = () => {
+    const { customerId }= this.props;
+    servers.getVerInfoList({customerId}).then(res => {
+      if (res.result === 200) {
+        res.data ? this.setState({ data: res.data }) : this.setState({ data: [] });
+      } else {
+        const args = {
+          message: '通信失败',
+          description: res.message,
+          duration: 2,
+        };
+        notification.error(args);
+      }
+    }).catch(
+      err => { console.log(err) }
+    )
+  }
+  
+  handleAddNewVersion = () => {
+    this.setState({
+      addBtnFlag:!this.state.addBtnFlag,
+    });
+    this.fetchVersionList();
+  }
+  
+  handleDelete = () => {
+  
+  }
+  
+  render() {
+    const { data, addBtnFlag } = this.state;
+    const columns = [{
+      title: '版本名称',
+      dataIndex: 'versionName',
+    },{
+      title: '版本号',
+      dataIndex: 'versionCode',
+    },{
+      title:'版本描述',
+      dataIndex:'versionDescription',
+    },{
+      title:'文件大小',
+      dataIndex:'fileSize',
+    },{
+      title:'上传者',
+      dataIndex:'uploader',
+    },{
+      title:'上传时间',
+      dataIndex:'uploadTime'
+    },{
+      title: '操作',
+      dataIndex: 'operation',
+      width: '10%',
+      render: (text, record) => {
+        return (
+          <a href="javascript:;" onClick={() => { this.handleDelete(record) }}>删除</a>
+        );
+      },
+    }];
+    return (
+      <React.Fragment>
+        <h2 className="material-title">软件版本管理</h2>
+        <Row>
+          <Col span={3} offset={21}>
+            <Button type="primary" size="large" icon="plus" style={{float:'right'}} onClick={this.handleAddNewVersion}>添加版本</Button>
+          </Col>
+        </Row>
+        <Table columns={columns} dataSource={data} rowKey={record => record.id}/>
+        
+      </React.Fragment>
+    )
+  }
+}
+
+const mapState = (state) => {
+  const { customerId } = state.auth.user;
+  return { customerId }
+};
+export const Versions = connect(mapState)(versions);

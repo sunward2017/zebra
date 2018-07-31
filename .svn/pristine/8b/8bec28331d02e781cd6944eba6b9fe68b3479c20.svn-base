@@ -1,0 +1,127 @@
+
+.custom  .login-form {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    margin: -160px 0 0 -160px;
+    width: 320px;
+    height: 320px;
+    padding: 36px;
+    -webkit-box-shadow: 0 0 100px rgba(0,0,0,.08);
+    box-shadow: 0 0 100px rgba(0,0,0,.08);
+  }
+  .custom .login-form-forgot {
+    float: right;
+  }
+  .custom .login-form-button {
+    width: 100%;
+  }
+
+ .custom .ant-layout{
+   line-height:1.15;
+ }
+ .custom .logo{
+    width: 240px;
+    height:58px;  
+    margin: 2px 28px 2px 0;
+    float: left;
+    border-right:1px solid #ccc;
+ }
+ .custom .logo .title{
+   line-height:36px;
+   font-size:20px;
+   font-weight:bold;
+   color:#fff;
+   font-family: 'Times New Roman', Times, serif;
+  }
+ .custom .logo .company{
+   line-height:16px;
+   font-size:12px;
+   color:ghostwhite;
+ }
+ .custom .banner{
+   position: absolute;
+   top:5px;
+   right:35px;
+ }
+ .material-title,.material-search{
+   margin: 15px 0 6px;
+ }
+ .dateTime{
+   width:100%;
+ }
+ .margin-b{
+   margin-bottom: 10px;
+ }
+ .pop-up-box{
+   position: absolute;
+   z-index: 100;
+   top:0;
+   bottom: 0;
+   width: 100%;
+   height: 100%;
+   background-color: rgba(0,0,0,.3);
+ }
+.material-filter-dropdown {
+  padding: 8px;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, .2);
+}
+.material-filter-dropdown input{
+  width: 130px;
+  margin-right: 8px;
+}
+.material-in-ipt{
+  width:150px;
+}
+.overflow{
+  overflow: auto;
+  height: 100%;
+}
+.popup-height{
+  height: 350px;
+}
+.highlight {
+  color: #f50;
+}
+.editable-cell{
+    position: relative;
+}
+.editable-cell-icon,
+.editable-cell-icon-check {
+    cursor: pointer;
+}
+.editable-cell-icon {
+    line-height: 14px;
+    position: absolute;
+    right: 10px;
+    margin-top: 5px;
+}
+.editable-cell-ipt{
+    width:100px;
+    position:absolute;
+    margin-top: -15px;
+}
+
+.upload-list-inline .ant-upload-list-item {
+  float: left;
+  width: 200px;
+  margin-right: 8px;
+}
+.upload-list-inline .ant-upload-animate-enter {
+  animation-name: uploadAnimateInlineIn;
+}
+.upload-list-inline .ant-upload-animate-leave {
+  animation-name: uploadAnimateInlineOut;
+}
+
+.editor-content{
+  border:1px solid #e1e1e1;
+  padding-left:20px;
+  padding-right: 20px;
+  min-height:400px;
+}
+.rdw-editor-toolbar{
+  border:1px solid #e1e1e1;
+}
