@@ -103,7 +103,6 @@ export class material extends React.Component {
     }];
     return (
       <React.Fragment>
-        <h2 className="material-title">物料清单</h2>
         <Table columns={columns} dataSource={data} rowKey={record => record.id}/>
       </React.Fragment>
     )

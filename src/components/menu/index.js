@@ -3,6 +3,7 @@ import { Menu, Icon } from 'antd'
 import { menuData as allMenu } from '@/config/menuData'
 import React, { PureComponent } from 'react';
 
+
 const SubMenu = Menu.SubMenu;
 class PlanMenu extends PureComponent {
     constructor(props) {
@@ -17,7 +18,12 @@ class PlanMenu extends PureComponent {
         this.setState({
             current: e.key || special,
         });
+        const { keyPath } = e;
+        const path = keyPath[keyPath.length - 1];
+        const menu = keyPath.length>1?allMenu.find(ele => (ele.url === path)).children.find(e=>e.url===keyPath[0]).name:allMenu.find(ele => (ele.url === path)).name;
+        this.props.toggleLocal(menu);
     }
+
     render() {
         return (
             <Menu
@@ -50,6 +56,7 @@ class PlanMenu extends PureComponent {
                     })
                 }
             </Menu>
+
         )
     }
 }

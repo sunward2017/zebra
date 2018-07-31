@@ -47,7 +47,7 @@ class NormalLoginForm extends Component {
         <FormItem>
           {getFieldDecorator('account', {
             rules: [{ required: true, message: '请输入用户名!' }],
-            initialValue: "byf"
+            initialValue:'byf'
           })(
             <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Username" />
           )}
@@ -55,7 +55,7 @@ class NormalLoginForm extends Component {
         <FormItem>
           {getFieldDecorator('password', {
             rules: [{ required: true, message: '请输入密码!' }],
-            initialValue: "123456"
+            initialValue:'123456' 
           })(
             <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password" />
           )}

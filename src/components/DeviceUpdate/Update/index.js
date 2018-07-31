@@ -64,9 +64,9 @@ export class Versions extends React.Component {
   handleOnRow = (roleId ) => {
     return {
       onClick: () => {
-        console.log('click row');
+        
         servers.getRoleDetail({roleId}).then(res => {
-          console.log('detail:',res);
+        
           if (res.result === 200) {
             res.data ? this.setState({ detailData: res.data }) : this.setState({ detailData: [] });
           } else {
@@ -98,7 +98,7 @@ export class Versions extends React.Component {
     const { data, detailData, addBtnFlag } = this.state;
     return (
       <React.Fragment>
-        <h2 className="material-title">升级策略管理</h2>
+        
         <Row>
           <Col span={18}>
             <Row>

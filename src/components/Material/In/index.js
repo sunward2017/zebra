@@ -149,7 +149,7 @@ class materialIn extends React.Component {
   handleRowDelete(key) {
     const { customerId } = this.props;
     const that = this;
-    console.log(customerId,key);
+    
     servers.deleteGodownEntryMain({ customerId: customerId,id:key,status:0}).then(res => {
       if (res.result === 200) {
         notification.success({
@@ -260,18 +260,18 @@ class materialIn extends React.Component {
     }];
     return (
       <React.Fragment>
-        <h2 className="material-title">入库单列表</h2>
+        
         <Row gutter={16} className="material-search">
           <Col span={6}>
             <RangePicker
-              size="large"
+              
               disabledDate={ current => current > new Date() }
               format={dateFormat}
               onChange={this.handleRangePickerChange}
             />
           </Col>
           <Col span={3} offset={15}>
-            <Button type="primary" size="large" icon="plus" onClick={this.handleAddNewMaterial}>新增入库单</Button>
+            <Button type="primary"   icon="plus" onClick={this.handleAddNewMaterial}>新增入库单</Button>
           </Col>
         </Row>
         <Table columns={columns} dataSource={data} rowKey={record => record.id}/>

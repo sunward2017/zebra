@@ -191,7 +191,7 @@ export default class workBill extends React.Component {
 
     render(){
         const fields = this.state.fields;
-        const operation = <Button onClick={this.modify}>新增</Button>;
+        const operation = <Button onClick={() => { this.modify()}}>新增</Button>;
 
         // const { getFieldDecorator } = this.props.form;
         // const { autoCompleteResult } = this.state;

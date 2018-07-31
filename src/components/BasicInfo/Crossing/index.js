@@ -48,8 +48,7 @@ class crossing extends React.Component {
       }],
       addBtnFlag:false,
       action:'',
-      editRecord:{},
-      curCity:'',
+      editRecord:{}
     };
     this.getDistrictTree();
   }
@@ -69,7 +68,7 @@ class crossing extends React.Component {
   
   getCrossingList = (nodeData) => {
     servers.getRoadSetInfoList(nodeData).then(res => {
-      // console.log('list data:',res);
+      console.log('list data:',res);
       if (res.result === 200) {
         res.data ? this.setState({ crossingList: res.data }) : this.setState({ crossingList: [] });
       } else {
@@ -153,7 +152,7 @@ class crossing extends React.Component {
   handelTreeNodeSelect = (selectedKeys,info) => {
     if(!info.selected) return;
     const node = info.selectedNodes[0].props.dataRef;
-   
+    console.log('node:',node);
     this.setState({
       selectedNode:node,
     });
@@ -161,17 +160,13 @@ class crossing extends React.Component {
   }
   
   handleAddNewCrossing = () => {
-   
     if(!this.state.selectedNode.id) {
       this.noticWarning('请先选择地区再添加路口！');
       return
     }
-    let curId=this.state.selectedNode.cityId.substr(0,3);
-    let curCity=this.state.treeNodeData.find(item=>(item.cityId==curId)).cityName
     this.setState({
       action:'',
-      addBtnFlag:true,
-      curCity
+      addBtnFlag:true
     })
   }
   
@@ -231,7 +226,6 @@ class crossing extends React.Component {
           {
             addBtnFlag ?
               <CrossingEdit
-                curCity={this.state.curCity}
                 record={ action === 'modify' ? editRecord : {} }
                 onChange={this.handleChangeCrossing() }
               /> : null

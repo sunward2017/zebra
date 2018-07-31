@@ -98,7 +98,7 @@ class versions extends React.Component {
     const { data, addBtnFlag } = this.state;
     return (
       <React.Fragment>
-        <h2 className="material-title">软件版本管理</h2>
+        
         <Row>
           <Col span={3} offset={21}>
             <Button type="primary" size="large" icon="plus" style={{float:'right'}} onClick={this.handleAddNewVersion}>添加版本</Button>

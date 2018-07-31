@@ -91,15 +91,20 @@ export default {
     modifyDeviceType: host.api + "/ModifyDeviceType",
     deleteDeviceType: host.api + "/DeleteDeviceType",
 
+    //施工日历
+    getWorkCalendar:host.api+'/GetWorkCalendar',
+
     //斑马线业主
     getBanMaLineOwnerList: host.api + '/GetBanMaLineOwnerList',
+    modifyBanMaLineOwnerInfo: host.api +'/ModifyBanMaLineOwnerInfo',
+    deleteBanMaLineOwnerInfo: host.api+'/DeleteBanMaLineOwnerInfo',
 
     //斑马线施工团队
     getRoadWorkerList: host.api + '/GetRoadWorkerList',
     addRoadWorkInfo: host.api + '/AddRoadWorkInfo',
     deleteRoadWorkerInfo: host.api + '/DeleteRoadWorkerInfo',
 
-    //团队人员
+    //施工单
     getDayWorkRecoder: host.api + '/GetDayWorkRecoder',
     modifyDayWorkRecoder: host.api + '/ModifyDayWorkRecoder',
     delDayWorkRecoder: host.api + '/DelDayWorkRecoder',
@@ -107,6 +112,7 @@ export default {
     //勘察
     getSurveyInfo: host.api + '/GetSurveyInfo',
     modifySurveyInfo: host.api + '/ModifySurveyInfo',
+    deleteSurveyInfo:host.api+'/DeleteSurveyInfo',
 
     //竣工单
     getCompletedInfo: host.api + '/GetCompletedInfo',

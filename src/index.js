@@ -9,7 +9,7 @@ import registerServiceWorker from './registerServiceWorker';
 
 import { Router, Route, IndexRoute, browserHistory } from 'react-router';
 
-import 'antd/dist/antd.min.css';
+import 'antd/dist/antd.css';
 import './asset/theme/default.css';
 
 import store from './store'

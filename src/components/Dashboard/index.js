@@ -17,11 +17,10 @@ export class dashBoard extends Component {
         this.getArea();
     }
     getArea() {
-        let _this = this;
         servers.getAreaInfoTree().then(res => {
             if (res.result === 200) {
-                if (res.data) {
-                    let curCity = res.data.areaInfoList[0].cityName;
+                if (res.data&&res.data.areaInfoList&&res.data.areaInfoList.length>0) {
+                    let curCity = res.data.areaInfoList[0].cityName||'杭州';
                     curCity = (curCity.indexOf('市') == -1) ? (curCity + '市') : curCity;
                     this.setState({ curCity })
                 }
@@ -44,7 +43,7 @@ export class dashBoard extends Component {
                     }}
                     zoom='5'
                     style={{ height: '80vh' }}
-                    mapStyle={{ style: 'midnight' }}>
+                    > 
                     <MapvLayer
                         data={markers}
                         options={{
