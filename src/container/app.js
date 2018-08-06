@@ -23,21 +23,28 @@ class App extends React.Component {
     this.setState({ local: m })
   }
   render() {
-    const { load, children } = this.props
+    const { load, children, user } = this.props
     const { local } = this.state;
-    const whiteList = ['实时监控', '首页', '施工信息']
+    // const whiteList = ['实时监控', '施工信息']
     return (
       <Layout>
         <Local.Provider value={{ ...this.state, load }}>
           <PlanMenu />
         </Local.Provider>
-        {Array.indexOf(whiteList, local) === -1 ? < h3 className='header-top' > {this.state.local}</h3>  : null}
-        <div className='header-top1'></div>
-        <Content style={{ background: '#fcfcfc', padding: 24, minHeight: '86vh' }}>
-          <LocaleProvider locale={zh_CN}>{children}</LocaleProvider>
+        {/* {Array.indexOf(whiteList, local) === -1 ? < h3 className='header-top' > {this.state.local}</h3>  : null} */}
+        <div className='header-top' >
+          {this.state.local} &gt;&gt;
+          <div className="UserWelcome">
+            您好，<b>{user}</b>
+          </div>
+        </div>
+        <Content>
+          <div style={{ width: '90%', margin: '30px auto', border: '1px solid #ccc', background: '#fff' }}>
+            <LocaleProvider locale={zh_CN}>{children}</LocaleProvider>
+          </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
-          woosiyuan @ 2018
+          浙江梧斯源科技股份有限公司 woosiyuan @ 2018
         </Footer>
       </Layout>
     )
@@ -45,7 +52,7 @@ class App extends React.Component {
 }
 
 const auth = (state) => {
-  return { load: state.load.state }
+  return { load: state.load.state, user: state.auth.user.account }
 }
 
 export default connect(auth)(App);

@@ -60,6 +60,7 @@ class RegistrationForm extends PureComponent {
 
     handleOk = (e) => {
         e.preventDefault();
+        this.setState({subLoading:true})
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
                 const { zebracrossingId } = this.props;

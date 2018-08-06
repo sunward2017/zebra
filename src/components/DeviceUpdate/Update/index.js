@@ -4,48 +4,48 @@ import servers from '@/server'
 import RuleEdit from './RuleEdit'
 
 export class Versions extends React.Component {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
-      data:[],
-      detailData:[],
-      addBtnFlag:false,
+      data: [],
+      detailData: [],
+      addBtnFlag: false,
     };
     this.columns = [{
       title: '包名',
       dataIndex: 'packageName',
-    },{
+    }, {
       title: '版本号',
       dataIndex: 'versionCode',
-    },{
-      title:'描述',
-      dataIndex:'description',
-    },{
-      title:'更新方式',
-      dataIndex:'upgradeWay',
-    },{
-      title:'操作者',
-      dataIndex:'creator',
-    },{
-      title:'创建时间',
-      dataIndex:'createTime'
+    }, {
+      title: '描述',
+      dataIndex: 'description',
+    }, {
+      title: '更新方式',
+      dataIndex: 'upgradeWay',
+    }, {
+      title: '操作者',
+      dataIndex: 'creator',
+    }, {
+      title: '创建时间',
+      dataIndex: 'createTime'
     }];
     this.detailColumns = [{
       title: '设备编号',
       dataIndex: 'devSn',
-    },{
+    }, {
       title: '斑马线名称',
       dataIndex: 'zebracrossingName',
     }];
   }
-  
+
   componentDidMount() {
     this.fetchRuleList();
   }
-  
+
   fetchRuleList = () => {
-    const { customerId }= this.props;
-    servers.getRoleList({customerId}).then(res => {
+    const { customerId } = this.props;
+    servers.getRoleList({ customerId }).then(res => {
       if (res.result === 200) {
         res.data ? this.setState({ data: res.data }) : this.setState({ data: [] });
       } else {
@@ -60,13 +60,13 @@ export class Versions extends React.Component {
       err => { console.log(err) }
     )
   }
-  
-  handleOnRow = (roleId ) => {
+
+  handleOnRow = (roleId) => {
     return {
       onClick: () => {
-        
-        servers.getRoleDetail({roleId}).then(res => {
-        
+
+        servers.getRoleDetail({ roleId }).then(res => {
+
           if (res.result === 200) {
             res.data ? this.setState({ detailData: res.data }) : this.setState({ detailData: [] });
           } else {
@@ -83,30 +83,25 @@ export class Versions extends React.Component {
       }
     }
   }
-  
+
   handleAddNewRule = () => {
     const { addBtnFlag } = this.state;
-    if(addBtnFlag){
+    if (addBtnFlag) {
       this.fetchRuleList();
     }
     this.setState({
-      addBtnFlag:!addBtnFlag,
+      addBtnFlag: !addBtnFlag,
     });
   }
-  
+
   render() {
     const { data, detailData, addBtnFlag } = this.state;
     return (
       <React.Fragment>
-        
+
         <Row>
           <Col span={18}>
-            <Row>
-              <Col span={3} offset={21}>
-                <Button type="primary" size="large" icon="plus" style={{float:'right'}} onClick={this.handleAddNewRule}>新增规则</Button>
-              </Col>
-            </Row>
-            <Table columns={this.columns} dataSource={data} rowKey={record => record.id} onRow={(record) => this.handleOnRow(record.id)}/>
+            <Table columns={this.columns} dataSource={data} rowKey={record => record.id} onRow={(record) => this.handleOnRow(record.id)} />
           </Col>
           <Col span={5} offset={1}>
             <Card title="详情">
@@ -114,6 +109,14 @@ export class Versions extends React.Component {
             </Card>
           </Col>
         </Row>
+
+        <Col span={24}>
+          <div className="table_tial">
+            <div className="FunctionButton"><a href="javascript:;" onClick={this.handleAddNewRule}>新增规则</a></div>
+          </div>
+
+        </Col>
+
         {
           addBtnFlag ? <RuleEdit onChange={this.handleAddNewRule} /> : null
         }

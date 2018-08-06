@@ -114,7 +114,7 @@ class VersionEdit extends React.Component {
               getValueFromEvent: this.normFile,
             })(
               <Upload
-                action="/dev/UploadFile"
+                action="/UploadFile"
                 name="file"
                 beforeUpload={(file) => {
                   this.props.form.setFieldsValue({ file: [file] });

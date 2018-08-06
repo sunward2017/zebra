@@ -12,8 +12,7 @@ const menu = () => {
                 ({ load, toggleLocal }) => (
                     <Header>
                         <div className="logo">
-                            <div className="title">智慧斑马线运营平台</div>
-                            <div className="company">浙江梧斯源科技股份有限公司</div>
+                             智慧斑马线运营平台
                         </div>
                         <Menu toggleLocal={toggleLocal} />
                         <div className="banner">

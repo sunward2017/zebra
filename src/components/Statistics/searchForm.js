@@ -1,6 +1,7 @@
 import React from 'react'
 import { Form, Button, Select, DatePicker } from 'antd';
 import moment from "moment"
+import servers from '@/server'
 
 const { RangePicker } = DatePicker;
 const Option = Select.Option;
@@ -12,13 +13,26 @@ function hasErrors(fieldsError) {
 }
 
 class HorizontalLoginForm extends React.Component {
-
+  state={
+    zebraCitys: [],
+  }
   componentDidMount() {
     // To disabled submit button at the beginning.
-    this.props.form.validateFields();
-    this.handleSubmit()
-
+   // this.props.form.validateFields();
+    this.getArea(); 
   }
+  getArea=()=> {
+    let _this = this;
+    servers.getAreaInfoTree().then(res => {
+        if (res.result === 200) {
+            if (res.data) {
+                let area = res.data.areaInfoList.map(item => { return { id: item.cityId, name: item.cityName } });
+                _this.setState({ zebraCitys: area })
+                this.handleSubmit();
+            }
+        }
+    })
+}
   handleSubmit = (e) => {
     e && e.preventDefault();
     this.props.form.validateFields((err, fieldValues) => {
@@ -37,7 +51,7 @@ class HorizontalLoginForm extends React.Component {
 
   render() {
     const { getFieldDecorator, getFieldsError, getFieldError, isFieldTouched } = this.props.form;
-    const { zebraCitys } = this.props;
+    const { zebraCitys } = this.state;
     const startTime = moment().subtract(1, 'day');
     const endTime = moment();
     const dateFormat = "YY-MM-DD HH:mm:ss";
@@ -84,12 +98,13 @@ class HorizontalLoginForm extends React.Component {
         </FormItem>
         <FormItem>
           <Button
+            ghost
             icon="search"
             type="primary"
             htmlType="submit"
             disabled={hasErrors(getFieldsError())}
           >
-            搜索
+           查询 
           </Button>
         </FormItem>
       </Form>

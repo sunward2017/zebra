@@ -214,16 +214,19 @@ export class Inspection extends React.Component {
     }
     return (
       <div>
-        <Row gutter={16}>
-          <Col span={20} offset={4}>
+        <div className='zebra_area'>
+          <Col span={4}>
+            斑马线设置
+          </Col>
+          <Col span={20}>
             <SearchReportForm changeZebra={this.changeZebra} onRef={this.onRef} />
           </Col>
-        </Row>
-        <Divider />
+        </div>
         <Row gutter={16}>
           <Col span={4}>
             <Card style={{ textAlign: 'center' }}>
               <Button
+
                 style={btn}
                 icon="file-word"
                 type="primary"
@@ -233,6 +236,7 @@ export class Inspection extends React.Component {
                </Button>
               <br />
               <Button
+
                 style={btn}
                 icon="file-word"
                 type="primary"
@@ -242,6 +246,7 @@ export class Inspection extends React.Component {
                </Button>
               <br />
               <Button
+
                 style={btn}
                 icon="file-word"
                 type="primary"
@@ -251,6 +256,7 @@ export class Inspection extends React.Component {
                </Button>
               <br />
               <Button
+
                 style={btn}
                 icon="file-word"
                 type="primary"
@@ -260,6 +266,7 @@ export class Inspection extends React.Component {
                </Button>
               <br />
               <Button
+
                 style={btn}
                 icon="file-word"
                 type="primary"
@@ -269,6 +276,7 @@ export class Inspection extends React.Component {
                </Button>
               <br />
               <Button
+
                 style={btn}
                 icon="file-word"
                 type="primary"
@@ -278,6 +286,7 @@ export class Inspection extends React.Component {
                </Button>
               <br />
               <Button
+
                 style={btn}
                 icon="file-word"
                 type="primary"
@@ -287,6 +296,7 @@ export class Inspection extends React.Component {
                </Button>
               <br />
               <Button
+
                 style={btn}
                 icon="file-word"
                 type="primary"
@@ -296,6 +306,7 @@ export class Inspection extends React.Component {
                </Button>
               <br />
               <Button
+
                 style={btn}
                 icon="file-word"
                 type="primary"
@@ -305,6 +316,7 @@ export class Inspection extends React.Component {
               </Button>
               <br />
               <Button
+
                 style={btn}
                 icon="file-word"
                 type="primary"
@@ -314,6 +326,7 @@ export class Inspection extends React.Component {
                </Button>
               <br />
               <Button
+
                 style={btn}
                 icon="file-word"
                 type="primary"

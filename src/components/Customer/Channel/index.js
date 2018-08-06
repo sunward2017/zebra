@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import { Table, Tabs, Icon, notification, Button, Divider, Modal,Popconfirm } from 'antd'
+import { Table, Tabs, Icon, notification, Button, Divider, Modal, Popconfirm ,Col} from 'antd'
 import servers from '@/server'
 import ChannelForm from './form'
 import { formatData, restore } from '@/utils'
@@ -183,16 +183,23 @@ class channel extends PureComponent {
     }];
 
     const fields = this.state.fields;
-    const operation = <Button onClick={this.Add}>新增</Button>;
+
     return (
-      <Tabs tabBarExtraContent={operation} activeKey={this.state.activeKey} onChange={this.callback}>
-        <TabPane tab={<span><Icon type="usergroup-add" />代理商列表</span>} key="1">
-          <Table dataSource={this.state.data} columns={columns} rowKey={record => record.id} />
-        </TabPane>
-        <TabPane tab={<span><Icon type="user-add" />代理商输入</span>} key="2">
-          <ChannelForm modifyCustomerInfo={this.handleModifyCustomerInfo} {...fields} onChange={this.handleFormChange} />
-        </TabPane>
-      </Tabs>
+      <React.Fragment>
+        <Tabs activeKey={this.state.activeKey} onChange={this.callback}>
+          <TabPane tab={<span><Icon type="usergroup-add" />代理商列表</span>} key="1">
+            <Table dataSource={this.state.data} columns={columns} rowKey={record => record.id} />
+          </TabPane>
+          <TabPane tab={<span><Icon type="user-add" />代理商输入</span>} key="2">
+            <ChannelForm modifyCustomerInfo={this.handleModifyCustomerInfo} {...fields} onChange={this.handleFormChange} />
+          </TabPane>
+        </Tabs>
+        <Col span={24}>
+          <div className="table_tial">
+            <div class="FunctionButton"><a href="javascript:;" onClick={this.Add}>新增</a></div>
+          </div>
+        </Col>
+      </React.Fragment>
     )
   }
 }

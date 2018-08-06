@@ -1,6 +1,6 @@
 import 'whatwg-fetch';
 import React, { Component } from 'react';
-import { Map, MapvLayer } from 'react-bmap';
+import { Map, Marker } from 'react-bmap';
 import { message } from 'antd';
 import citys from '@/asset/data/citys'
 import servers from '@/server'
@@ -9,7 +9,7 @@ export class dashBoard extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            markers: [{ "geometry": { "type": "Point", "coordinates": [120.160738, 30.280761] } }, { "geometry": { "type": "Point", "coordinates": [120.117385, 30.274305] } }],
+            markers: [],
             curCity: '',
         }
     }
@@ -19,13 +19,23 @@ export class dashBoard extends Component {
     getArea() {
         servers.getAreaInfoTree().then(res => {
             if (res.result === 200) {
-                if (res.data&&res.data.areaInfoList&&res.data.areaInfoList.length>0) {
-                    let curCity = res.data.areaInfoList[0].cityName||'杭州';
-                    curCity = (curCity.indexOf('市') == -1) ? (curCity + '市') : curCity;
+                if (res.data && res.data.areaInfoList && res.data.areaInfoList.length > 0) {
+                    const city = res.data.areaInfoList[0]
+                    const { cityId, cityName } = city;
+
+                    this.getDevMonitor({ cityId })
+                    let curCity = (cityName.indexOf('市') == -1) ? (cityName + '市') : cityName;
                     this.setState({ curCity })
                 }
             } else {
                 message.error("获取地区失败", 2)
+            }
+        })
+    }
+    getDevMonitor = (cityId) => {
+        servers.getDevMonitorInfo(cityId).then(res => {
+            if (res.result === 200) {
+                res.data ? this.setState({ markers: res.data }) : this.setState({ markers: [] })
             }
         })
     }
@@ -41,22 +51,12 @@ export class dashBoard extends Component {
                         lng: coors[0],
                         lat: coors[1]
                     }}
-                    zoom='5'
+                    zoom='12'
                     style={{ height: '80vh' }}
-                    > 
-                    <MapvLayer
-                        data={markers}
-                        options={{
-                            fillStyle: 'rgba(255, 250, 150, 0.8)',
-                            shadowColor: 'rgba(255, 250, 50, 0.3)',
-                            shadowBlur: 30,
-                            globalCompositeOperation: 'lighter',
-                            size: 5,
-                            draw: 'simple',
-                            autoViewport: true,
-                            viewportOptions: { zoomFactor: -3 }
-                        }}
-                    />
+                >
+                    {markers.map((marker, index) => {
+                        return <Marker key={index} icon='loc_blue' position={{ lng: marker.longitude, lat: marker.latitude }} />
+                    })}
                 </Map>
             </React.Fragment>
         )

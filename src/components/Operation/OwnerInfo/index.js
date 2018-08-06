@@ -1,41 +1,36 @@
 import React from 'react';
-import {Table ,Icon, Button, Select, notification ,Form ,Input, DatePicker,TreeSelect  } from 'antd';
+import { Table, Icon, Button, Select, notification, Form, Input, DatePicker, TreeSelect } from 'antd';
 import servers from '@/server'
 import { connect } from 'react-redux';
-import { formatData, restore } from '@/utils'
-import {getToken} from '@/utils/auth'
+ 
 
 const Option = Select.Option;
 const FormItem = Form.Item;
 
 
 class ownerInfoForm extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
-        console.log("props");
-        console.log(props);
-        this.state={
+        this.state = {
             customerId: '',
-            zebraId:0,
-            operateId:0,
-            token:[],
-            session:'',
-            account:'',
+            zebraId: 0,
+            operateId: 0,
+            token: [],
+            account: '',
             activeKey: '1',
-            ownerData:[],
-            ownerNameInfo:[],
-            roadId:1,
-            fields:{},
-            Action:0,
+            ownerData: [],
+            ownerNameInfo: [],
+            roadId: 1,
+            fields: {},
+            Action: 0,
         };
     }
     //函数
 
-    componentWillMount(){
-       const { zebracrossingId } = this.props;
-       this.getInitial();
-       this.getOwnerName();
-       this.getZebraOwnerInfo({zebracrossingId});
+    componentWillMount() {
+        const { zebracrossingId } = this.props;
+        this.getOwnerName();
+        this.getZebraOwnerInfo({ zebracrossingId });
     };
 
     componentWillReceiveProps(nextProps) {
@@ -44,28 +39,16 @@ class ownerInfoForm extends React.Component {
         }
     }
 
-    getInitial(){
-        this.token = getToken();
-         
-        // console.log(this.token.session);
-        this.state.session = this.token.session;
-        this.state.account = this.token.account;
-        this.state.customerId = this.token.customerId;
-        
-        // this.id = this.token.id;
-        this.operateId = this.token.id;
 
-
-    }
     //拿到表单初始化信息
     getZebraOwnerInfo = (zebracrossingId) => {
         servers.getBanMaLineOwnerList(zebracrossingId).then(res => {
             if (res.result == 200) {
-                if(res.data){
-                    this.setState({ Action:1,fields:res.data[0] });
-                   
-                }else {
-                    this.setState({ Action:0,fields: {} });
+                if (res.data) {
+                    this.setState({ Action: 1, fields: res.data[0] });
+
+                } else {
+                    this.setState({ Action: 0, fields: {} });
                 }
             } else {
                 const args = {
@@ -79,15 +62,15 @@ class ownerInfoForm extends React.Component {
             err => { console.log(err) }
         )
     };
-//拿到业主选项
-    getOwnerName = () =>{
-      
-        servers.getOwnerList({customerId:this.state.customerId}).then(res=>{
-           
-            if(res.result==200){
+    //拿到业主选项
+    getOwnerName = () => {
+
+        servers.getOwnerList({ customerId: this.state.customerId }).then(res => {
+
+            if (res.result == 200) {
                 res.data ? this.setState({ ownerNameInfo: res.data, }) : this.setState({ ownerNameInfo: [] });
-              
-            }else{
+
+            } else {
                 const args = {
                     message: '通信失败',
                     description: res.message,
@@ -99,24 +82,18 @@ class ownerInfoForm extends React.Component {
 
     };
 
-    renderOptions = () =>{
-        console.log("renderOptions");
+    renderOptions = () => {
         const data = this.state.ownerNameInfo;
-        console.log(data);
-        if(data!={}){
-            return data.map((item)=>{
-                console.log("Options");
+        if (data != {}) {
+            return data.map((item) => {
                 return (<Option value={item.ownerName} key={item.id}>{item.ownerName}</Option>)
             });
-        }else{
+        } else {
             return null;
         }
     };
 
-    handleSubmit = (e) =>{
-        // const f = this.props.getFieldValue();
-        console.log("handleSubmit");
-        // console.log(f);
+    handleSubmit = (e) => {
         e.preventDefault();
         this.props.form.validateFieldsAndScroll((err, values) => {
             const { zebracrossingId } = this.props;
@@ -127,7 +104,7 @@ class ownerInfoForm extends React.Component {
             if (!err) {
                 servers.modifyBanMaLineOwnerInfo({
                     ...values,
-                    ownerName:this.state.fields.ownerName,
+                    ownerName: this.state.fields.ownerName,
                     customerId: this.customerId,
                 }).then(res => {
                     let { result, message } = res;
@@ -139,7 +116,7 @@ class ownerInfoForm extends React.Component {
                         };
                         notification.success(args);
                         this.getZebraOwnerInfo();
-                    console.log(2);
+
                     } else {
                         const args = {
                             message: '提交失败',
@@ -148,14 +125,15 @@ class ownerInfoForm extends React.Component {
                         };
                         notification.error(args);
                     }
-                    console.log(3);
+
                 })
             }
         })
     };
 
-    deleteOwner = () =>{
-        servers.deleteBanMaLineOwnerInfo({id:26}).then(res => {
+    deleteOwner = () => {
+        const id = this.state.fields.id;
+        servers.deleteBanMaLineOwnerInfo({ id }).then(res => {
             let { result, message } = res;
             if (result == 200) {
                 const args = {
@@ -164,7 +142,10 @@ class ownerInfoForm extends React.Component {
                     duration: 2,
                 };
                 notification.success(args);
-                console.log(2);
+                const { zebracrossingId } = this.props;
+                this.getOwnerName();
+                this.getZebraOwnerInfo({ zebracrossingId });
+
             } else {
                 const args = {
                     message: '删除失败',
@@ -173,14 +154,13 @@ class ownerInfoForm extends React.Component {
                 };
                 notification.error(args);
             }
-            console.log(3);
+
         })
     };
 
 
-    select = (value) =>{
-        console.log(value);
-        this.setState({fields:{ownerName:value}});
+    select = (value) => {
+        this.setState({ fields: { ownerName: value } });
     };
 
     handleFormChange = (changedFields) => {
@@ -191,143 +171,124 @@ class ownerInfoForm extends React.Component {
 
 
     //render函数
-    render()
-        {
-            const { sectionsDescribe, location, ownerName, constructionSide , maintaining} = this.state.fields;
-            // console.log("render");
-            // console.log(ownerName);
-            const ownerNameInfo = this.state.ownerNameInfo;
-            const {getFieldDecorator} = this.props.form;
-            const formItemLayout = {
-                labelCol: {
-                    xs: {span: 24},
-                    sm: {span: 8},
+    render() {
+        const { sectionsDescribe, location, ownerName, constructionSide, maintaining } = this.state.fields;
+
+        const ownerNameInfo = this.state.ownerNameInfo;
+        const { getFieldDecorator } = this.props.form;
+        const formItemLayout = {
+            labelCol: {
+                xs: { span: 24 },
+                sm: { span: 8 },
+            },
+            wrapperCol: {
+                xs: { span: 24 },
+                sm: { span: 8 },
+            },
+        };
+        const tailFormItemLayout = {
+            wrapperCol: {
+                xs: {
+                    span: 24,
+                    offset: 0,
                 },
-                wrapperCol: {
-                    xs: {span: 24},
-                    sm: {span: 8},
+                sm: {
+                    span: 16,
+                    offset: 8,
                 },
-            };
-            const tailFormItemLayout = {
-                wrapperCol: {
-                    xs: {
-                        span: 24,
-                        offset: 0,
-                    },
-                    sm: {
-                        span: 16,
-                        offset: 8,
-                    },
-                },
-            };
-            return (
-                <div style={{marginTop: 10}}>
-                    <h1>业主信息</h1>
-                    <Form onSubmit={this.handleSubmit}>
-                        {/*</div>*/}
-                        <div style={{marginTop: 10 }}>
-                            {/*<Form onSubmit={this.handleSubmit}>*/}
-                            {/*<Form >*/}
-                            {/*<FormItem*/}
-                            {/*{...formItemLayout}*/}
-                            {/*label="施工单号"*/}
-                            {/*>*/}
-                            {/*{getFieldDecorator('workOrder', {*/}
-                            {/*initialValue:this.state.fields.workOrder,*/}
-                            {/*rules: [{*/}
-                            {/*required: true, message: '请输入有效的施工任务!',*/}
-                            {/*}],*/}
-                            {/*})(*/}
-                            {/*<Input  />*/}
-                            {/*)}*/}
-                            {/*</FormItem>*/}
+            },
+        };
+        return (
+            <div style={{ marginTop: 10 }}>
+                <h1>业主信息</h1>
+                <Form onSubmit={this.handleSubmit}>
+                    <div style={{ marginTop: 10 }}>
+                        <FormItem
+                            {...formItemLayout}
+                            label="路段描述"
+                        >
+                            {getFieldDecorator('sectionsDescribe', {
+                                initialValue: sectionsDescribe,
+                                rules: [{
+                                    required: true, message: '请输入有效的路段描述!',
+                                }],
 
-                            <FormItem
-                                {...formItemLayout}
-                                label="路段描述"
-                            >
-                                        {getFieldDecorator('sectionsDescribe', {
-                                            initialValue :  sectionsDescribe,
-                                            rules: [{
-                                                required: true, message: '请输入有效的路段描述!',
-                                            }],
+                            })(
 
-                                        })(
+                                <Input />
+                            )}
 
-                                            <Input />
-                                        )}
-
-                            </FormItem>
-                            <FormItem
-                                {...formItemLayout}
-                                label="位置信息"
-                            >
-                                {getFieldDecorator('location', {
-                                    initialValue :  location,
-                                    rules: [{
-                                        required: true, message: '请输入有效的位置信息!',
-                                    }],
-                                })(
-                                    <Input />
-                                )}
-                            </FormItem>
-                            <FormItem
+                        </FormItem>
+                        <FormItem
+                            {...formItemLayout}
+                            label="位置信息"
+                        >
+                            {getFieldDecorator('location', {
+                                initialValue: location,
+                                rules: [{
+                                    required: true, message: '请输入有效的位置信息!',
+                                }],
+                            })(
+                                <Input />
+                            )}
+                        </FormItem>
+                        <FormItem
                             {...formItemLayout}
                             label="业主名称"
-                            >
+                        >
                             {getFieldDecorator('ownerName', {
-                                initialValue :  ownerName,
-                            rules: [ {
-                            required: true, message: '请输入有效的业主名称!',
-                            }],
+                                initialValue: ownerName,
+                                rules: [{
+                                    required: true, message: '请输入有效的业主名称!',
+                                }],
                             })(
-                            <Select style={{ width: 450 }} onChange={this.select} >
-                                {this.renderOptions()}
-                            </Select>
+                                <Select style={{ width: 450 }} onChange={this.select} >
+                                    {this.renderOptions()}
+                                </Select>
                             )}
-                            </FormItem>
-                            <FormItem
-                                {...formItemLayout}
-                                label="施工方"
-                            >
-                                {getFieldDecorator('constructionSide', {
-                                    initialValue :  constructionSide,
-                                    rules: [{
-                                        required: true, message: '请输入有效的施工方!',
-                                    }],
-                                })(
-                                    <Input />
-                                )}
-                            </FormItem>
-                            <FormItem
-                                {...formItemLayout}
-                                label="维护方"
-                            >
-                                {getFieldDecorator('maintaining', {
-                                    initialValue :  maintaining,
-                                    rules: [{
-                                        required: true, message: '请输入有效的维护方!',
-                                    }],
-                                })(
-                                    <Input/>
-                                )}
-                            </FormItem>
+                        </FormItem>
+                        <FormItem
+                            {...formItemLayout}
+                            label="施工方"
+                        >
+                            {getFieldDecorator('constructionSide', {
+                                initialValue: constructionSide,
+                                rules: [{
+                                    required: true, message: '请输入有效的施工方!',
+                                }],
+                            })(
+                                <Input />
+                            )}
+                        </FormItem>
+                        <FormItem
+                            {...formItemLayout}
+                            label="维护方"
+                        >
+                            {getFieldDecorator('maintaining', {
+                                initialValue: maintaining,
+                                rules: [{
+                                    required: true, message: '请输入有效的维护方!',
+                                }],
+                            })(
+                                <Input />
+                            )}
+                        </FormItem>
 
-                            {/*button需要在form内，并设置htmlType类型为submit*/}
-                            <FormItem {...tailFormItemLayout}>
-                                <div>
+                        {/*button需要在form内，并设置htmlType类型为submit*/}
+                        <FormItem {...tailFormItemLayout}>
+                            <div>
                                 <span> <Button type="primary" htmlType="submit" onClick={this.handleSubmit}>保存</Button></span>
-                                <span style={{marginLeft:10}}><Button type="primary" htmlType="button" onClick={this.deleteOwner}  >删除</Button></span>
-                                </div>
-                            </FormItem>
+                                <span style={{ marginLeft: 10 }}><Button type="primary" htmlType="button" onClick={this.deleteOwner}  >删除</Button></span>
+                            </div>
+                        </FormItem>
 
-                        </div>
-                    </Form>
+                    </div>
+                </Form>
 
 
-                </div>
-            );
-        };
+            </div>
+        );
+    };
 
 }
 
@@ -338,17 +299,6 @@ const mapState = (state) => {
     }
 }
 
-const OwnerInfoForm = connect(mapState)(Form.create({
-    mapPropsToFields(props) {
-        let cusProps = {};
-        for (var k in props.data) {
-            cusProps[k] = Form.createFormField({
-                ...props[k],
-                value: props[k].value,
-            })
-        }
-        return cusProps;
-    }
-})(ownerInfoForm));
+const OwnerInfoForm = connect(mapState)(Form.create()(ownerInfoForm));
 
 export default OwnerInfoForm

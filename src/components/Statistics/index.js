@@ -1,14 +1,11 @@
 import 'whatwg-fetch';
 import React, { Component } from 'react';
-import { Row, Col, Tabs, Divider, Popover, notification, Button } from 'antd';
-import citys from '@/asset/data/citys'
+import { Row, Col, notification } from 'antd';
 import './style.css'
 import servers from '@/server'
 import SearchForm from './searchForm'
 import Cars from './carFlow'
 import Peoples from './peopleFlow'
-
-const TabPane = Tabs.TabPane;
 
 
 export class dashBoard extends Component {
@@ -17,31 +14,14 @@ export class dashBoard extends Component {
         this.state = {
             onRankListData: [],
             timesRankListData: [],
-            curCity: '',
+          
             xAxis: [],
             carYAxis: [],
             peopleYAxis: [],
-            zebraCitys: [],
             visible: true,
         }
-    }
-    componentDidMount() {
-        this.getArea();
-    }
-    getArea() {
-        let _this = this;
-        servers.getAreaInfoTree().then(res => {
-            if (res.result === 200) {
-                if (res.data) {
-                    let area = res.data.areaInfoList.map(item => { return { id: item.cityId, name: item.cityName } });
-                    _this.setState({ zebraCitys: area })
-                }
-            }
-        })
-    }
+    }   
     getResult = (params) => {
-        let curCity = this.state.zebraCitys.find(item => { if (item.id === params.cityId) return item }).name + '市';
-        this.setState({ curCity })
         servers.getDevMonitorInfo(params).then(res => {
             if (res.result === 200) {
                 let { data } = res;
@@ -74,26 +54,26 @@ export class dashBoard extends Component {
     }
 
     render() {
-        let { curCity, xAxis, carYAxis, peopleYAxis, onRankListData, timesRankListData, zebraCitys } = this.state;
-        let coors = citys[curCity] ? citys[curCity].split(',') : citys['上海市'].split(',');
-
-        let { markers } = this.state;
+        let {  xAxis, carYAxis, peopleYAxis, onRankListData, timesRankListData, zebraCitys } = this.state;
+       
+      
         const topColResponsiveProps = {
             xs: 24,
             sm: 12,
             md: 12,
             lg: 12,
             xl: 6,
-            content: {  width: '80%', margin: '30px auto', padding: '20px', boxShadow: '0px 0px 100px rgba(0,0,0,0.28)' }
+            content: { width: '90%', margin: '30px auto', padding: '20px', boxShadow: '0px 0px 100px rgba(0,0,0,0.28)' }
         };
 
         return (
             <React.Fragment>
-                <h3>
-                    <span>统计排行</span>
-                    <div style={{ float: 'right', marginRight: 20 }}> {zebraCitys.length > 0 ? <SearchForm zebraCitys={zebraCitys} handleGetResult={this.getResult} /> : ''}</div>
-                </h3>
-                <Divider dashed />
+                <div className='zebra_area'>
+                     
+                    <Col span={12} offset={12}>
+                        <SearchForm handleGetResult={this.getResult} />
+                    </Col>
+                </div>
                 <Row gutter={16} style={topColResponsiveProps.content}>
                     <Col xl={16} lg={12} md={12} sm={24} xs={24} >
                         <Cars xAxis={xAxis} carYAxis={carYAxis} />

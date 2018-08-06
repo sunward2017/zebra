@@ -1,73 +1,42 @@
-import React from 'react';
-import { Table, Tabs, Icon, Button, Select, notification, Divider, Form, Input, Modal, TreeSelect } from 'antd';
+import React from 'react'
+import { Steps, Button, message, notification, Row, Col, Spin } from 'antd';
 import servers from '@/server'
-import { formatData, restore } from '@/utils'
-import { getToken } from '@/utils/auth'
-import WorkBillForm from './form'
+import WorkForm from './form'
+import {compare} from '@/utils'
 
+const Step = Steps.Step;
 
-
-const TabPane = Tabs.TabPane;
-const confirm = Modal.confirm;
-
-
-export default class workBill extends React.Component {
+export default class App extends React.Component {
     constructor(props) {
         super(props);
-        this.columns = [
-            {
-                title: '斑马线ID',
-                dataIndex: 'zebracrossingId',
-                key: 'zebracrossingId',
-            },
-            {
-                title: '操作',
-                dataIndex: 'operate',
-                key: 'operate',
-            }, {
-                title: '图片',
-                dataIndex: 'imgUuid',
-                key: 'imgUuid',
-            }, {
-                title: '内容',
-                dataIndex: 'content',
-                key: 'content',
-            }, {
-                title: 'Action',
-                key: 'action',
-                render: (text, record) => (<span>
-                    <a href="javascript:;" onClick={() => { this.modify(record) }} style={{ marginRight: 20 }}>编辑</a>
-                    <a href="javascript:;" onClick={() => { this.handleDelete(record) }}>删除</a>
-                </span>
-                )
-            }
-        ];
         this.state = {
-            customerId: '',
-            token: [],
-            workBillData: [],
-            session: '',
-            account: '',
-            activeKey: '1',
-            Action: 0,
-            zebraId: 0,
-            fields: {},
+            current: 0,
+            workStep: {},
+            isLoading: true,
+            subLoading: false,
+            delLoading: false,
+            steps: [],
         };
     }
     componentWillMount() {
-        const { zebracrossingId } = this.props;
-        this.getWorkBillInfo({ zebracrossingId });
+        this.getWorkBillInfo();
     };
     componentWillReceiveProps(nextProps) {
         if (this.props.zebracrossingId !== nextProps.zebracrossingId) {
             this.getWorkBillInfo({ zebracrossingId: nextProps.zebracrossingId });
         }
     }
-    getWorkBillInfo = (zebracrossingId) => {
-        servers.getDayWorkRecoder(zebracrossingId).then(res => {
-
+    getWorkBillInfo = (Id) => {
+        this.setState({ isLoading: true });
+        const id = Id || { zebracrossingId: this.props.zebracrossingId }
+        servers.getDayWorkRecoder(id).then(res => {
             if (res.result == 200) {
-                res.data ? this.setState({ workBillData: res.data }) : this.setState({ workBillData: [] });
+                res.data&&res.data.sort(compare('workDate'));
+                const steps = res.data ? res.data.map((c, i) => ({ title: `步骤${++i}` })) : [{ title: '步骤1' }];
+                const { current } = this.state;
+                const workStep = res.data ? res.data[current] : { operate: '', content: '', zebracrossingId:id.zebracrossingId };
+                this.setState({ workStep, steps })
+
             } else {
                 const args = {
                     message: '通信失败',
@@ -76,141 +45,104 @@ export default class workBill extends React.Component {
                 };
                 notification.error(args);
             }
+            this.setState({ isLoading: false })
         }).catch(
             err => { console.log(err) }
         )
     };
+    add = () => {
+        const current = this.state.current + 1;
+        const l = this.state.steps;
+        const steps = l.push({title:`步骤${l.length+1}`})
+        const {zebracrossingId } =this.props;
+        this.setState({isLoading:true,workStep:{zebracrossingId},current})
+        let _this = this;
+        setTimeout(()=>{_this.setState({isLoading:false})},500)
+    }
+    next() {
+        const current = this.state.current + 1;
+        this.setState({ current });
+        this.getWorkBillInfo()
+    }
 
-    callback = (activeKey) => {
-        (!this.state.fields.Action) && (this.modify());
-        this.setState({ activeKey });
-    };
+    prev() {
+        const current = this.state.current - 1;
+        this.setState({ current });
+        this.getWorkBillInfo();
+    }
 
-    modify = (record) => {
-        let data = formatData({ ...record })
-        this.setState({ activeKey: '2', fields: { ...data, Action: { value: 1 } } })
-    };
-    //新增
-    handleModifyWorkBill = (values) => {
-        let options = restore(this.state.fields);
-
-        const { zebracrossingId } = this.props;
-        const { id } = this.state.field;
-        if (id) values.id = id;
-        values.Action = id ? 1 : 0;
-        values.zebracrossingId = zebracrossingId;
-
-        servers.modifyDayWorkRecoder(values).then(res => {
-            let { result, message } = res;
-            if (result == 200) {
+    handleSubmit = (e) => {
+        e.preventDefault();
+        this.props.form.validateFieldsAndScroll((err, values) => {
+            if (!err) {
+                const { zebracrossingId, id } = this.props;
+                values = {
+                    ...values,
+                    'Action': id ? 1 : 0,
+                    'zebracrossingId': zebracrossingId,
+                    'workDate': values.workDate.format('YYYY-MM-DD HH:mm:ss')
+                }
+                if (id) values.id = id;
+                this.setState({ subLoading: true })
+                servers.modifyDayWorkRecoder(values).then(res => {
+                    this.setState({ subLoading: false })
+                })
+            }
+        });
+    }
+    handleDelete = () => {
+        const { id } = this.props;
+        servers.delDayWorkRecoder({ id }).then(res => {
+            if (res.result == 200) {
                 const args = {
-                    message: '提交成功',
-                    description: message,
+                    message: '删除成功',
+                    description: res.message,
                     duration: 2,
                 };
                 notification.success(args);
-                this.setState({ activeKey: '1' });
-                this.getWorkBillInfo(zebracrossingId);
+                // _this.setState({ activeKey: '1' });
             } else {
                 const args = {
-                    message: '提交失败',
-                    description: message,
+                    message: '删除失败',
+                    description: res.message,
                     duration: 2,
                 };
                 notification.error(args);
             }
 
-        })
-    };
-
-    handleFormChange = (changedFields) => {
-        this.setState(({ fields }) => ({
-            fields: { ...fields, ...changedFields },
-        }));
-    };
-
-    handleDelete = (record) => {
-        // console.log(record);
-        let _this = this;
-        const { zebracrossingId } = this.props;
-        confirm({
-            title: "你确认删除施工单",
-            // content: record.content,
-            okText: '确认',
-            okType: 'danger',
-            cancelText: '取消',
-            onOk() {
-                let { id } = record;
-                console.log(id);
-                servers.delDayWorkRecoder({ id }).then(res => {
-                    if (res.result == 200) {
-                        const args = {
-                            message: '删除成功',
-                            description: res.message,
-                            duration: 2,
-                        };
-                        notification.success(args);
-                        // _this.setState({ activeKey: '1' });
-                    } else {
-                        const args = {
-                            message: '删除失败',
-                            description: res.message,
-                            duration: 2,
-                        };
-                        notification.error(args);
-                    }
-                    _this.getWorkBillInfo(zebracrossingId);
-                }).catch(e => { console.log(e) })
-            },
-            onCancel() {
-                console.log('Cancel');
-            },
-        });
-
-    };
+        }).catch(e => { console.log(e) })
+    }
 
     render() {
-        const fields = this.state.fields;
-        const operation = <Button onClick={() => { this.modify() }}>新增</Button>;
+        const { current, isLoading, workStep ,steps} = this.state;
 
-
-
-        const formItemLayout = {
-            labelCol: {
-                xs: { span: 24 },
-                sm: { span: 8 },
-            },
-            wrapperCol: {
-                xs: { span: 24 },
-                sm: { span: 15 },
-            },
-        };
         return (
-            <div style={{ marginTop: 10 }}>
-                <h1>施工单</h1>
-                <div style={{ marginTop: 10, height: '100%' }}>
-
-                    <Tabs tabBarExtraContent={operation} activeKey={this.state.activeKey} onChange={this.callback}>
-                        <TabPane tab={<span><Icon type="usergroup-add" />施工单列表</span>} key="1">
-                            <Table dataSource={this.state.workBillData} columns={this.columns} />
-                        </TabPane>
-                        <TabPane tab={<span><Icon type="user-add" />施工单输入</span>} key="2">
-                            {/*使用子组件*/}
-                            <div style={{ height: '100%' }}>
-                                <WorkBillForm modifyDayWorkRecoder={this.handleModifyWorkBill} {...fields} onChange={this.handleFormChange} />
-                            </div>
-                        </TabPane>
-                    </Tabs>
+            <div>
+                <Row gutter={5}>
+                    <Col span={18} offset={2}>
+                        <Steps current={current}>
+                            {steps.map((item, index) => <Step key={index} title={item.title} />)}
+                        </Steps>
+                    </Col>
+                    <Col span={1}></Col>
+                    <Col span={3}>
+                        <Button type="primary" onClick={this.add} style={{ marginRight:10,marginLeft:30 }} shape="circle" icon="plus"></Button>
+                        {
+                            current < steps.length - 1
+                            && <Button type="primary" onClick={() => this.next()} style={{ marginLeft: 10 }} shape="circle" icon="right-circle"></Button>
+                        }
+                        {
+                            current > 0
+                            && (
+                                <Button type="primary" style={{ marginLeft: 10 }} shape="circle" onClick={() => this.prev()} icon="left-circle"></Button>
+                            )
+                        }
+                    </Col>
+                </Row>
+                <div className="steps-content">
+                    {isLoading ? <Spin /> : <WorkForm {...workStep} />}
                 </div>
             </div>
         );
-    };
+    }
 }
-
-// const mapState = (state) => {
-//     const { customerId } = state.auth.user;
-//     return { customerId }
-// };
-//
-// export const Channel = connect(mapState)(workBill);
-

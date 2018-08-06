@@ -51,7 +51,7 @@ class materialIn extends React.Component {
   getMaterial() {
     let { customerId } = this.props;
     servers.listGodownEntryDetails({ customerId: customerId }).then(res => {
-      console.log('list res:',res);
+     
       if (res.result === 200) {
         res.data ? this.setState({ data: res.data,sourceData:res.data }) : this.setState({ data: [],sourceData:[] });
       } else {
@@ -262,9 +262,8 @@ class materialIn extends React.Component {
       <React.Fragment>
         
         <Row gutter={16} className="material-search">
-          <Col span={6}>
-            <RangePicker
-              
+          <Col span={5} offset={1}>
+            <RangePicker 
               disabledDate={ current => current > new Date() }
               format={dateFormat}
               onChange={this.handleRangePickerChange}

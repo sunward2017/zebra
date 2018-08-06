@@ -75,3 +75,17 @@ export function isPhone(value){
   var phoneReg = /^[1][3,4,5,7,8][0-9]{9}$/; 
   return phoneReg.test(value);
 }
+
+export function compare(pro) { 
+  return function (obj1, obj2) { 
+      var val1 = obj1[pro]; 
+      var val2 = obj2[pro]; 
+      if (val1 > val2 ) { //正序
+          return 1; 
+      } else if (val1 < val2 ) { 
+          return -1; 
+      } else { 
+          return 0; 
+      } 
+  } 
+}

@@ -148,7 +148,6 @@ class RegistrationForm extends PureComponent {
                                         <Input style={{ width: '100%' }} disabled />
                                     )}
                                 </FormItem>
-
                                 <FormItem
                                     {...formItemLayout}
                                     label="竣工时间"

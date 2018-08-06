@@ -22,7 +22,7 @@ function beforeUpload(file, id) {
 const UplaodImg = (props) => {
     const { imgUuid, title,getImg } = props;
     const prop = {
-        action: "/dev/UploadImg",
+        action: "/UploadImg",
         name: "img",
         beforeUpload: (file) => (beforeUpload(file, imgUuid)),
         data: { fuuid: imgUuid },

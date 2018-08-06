@@ -1,9 +1,9 @@
 import React, { PureComponent } from 'react';
-import {Table , Modal, Button , Checkbox, Tabs, Icon,Divider,notification,Select,TreeSelect } from 'antd';
+import { Table, Modal, Button, Checkbox, Tabs, Icon, Divider, notification, Select, TreeSelect } from 'antd';
 // import GroupInfoForm from './form'
 import servers from '@/server'
 import { formatData, restore } from '@/utils'
-import {getToken} from '@/utils/auth'
+import { getToken } from '@/utils/auth'
 
 const Option = Select.Option;
 const TabPane = Tabs.TabPane;
@@ -16,36 +16,24 @@ export default class WorkGroup extends PureComponent {
         super(props);
 
         this.columns = [
-            // {
-            //     title: '斑马线ID',
-            //     dataIndex: 'zebracrossingId',
-            //     key: 'zebracrossingId',
-            // },
-            {
-                title: '施工人员ID',
-                dataIndex: 'workerId',
-                key: 'workerId',
-            },{
+             {
                 title: '施工人员姓名',
                 dataIndex: 'workerName',
                 key: 'workerName',
-            },{
+            }, {
                 title: 'Action',
                 key: 'action',
                 render: (text, record) => (<span>
 
-        {/*<Divider type="vertical" />*/}
-        <a href="javascript:;" onClick={() => { this.handleDelete(record) }}>删除</a>
-      </span>
+                    {/*<Divider type="vertical" />*/}
+                    <a href="javascript:;" onClick={() => { this.handleDelete(record) }}>删除</a>
+                </span>
                 )
 
             }
         ];
 
         this.workerColumns = [{
-            title: '用户ID',
-            dataIndex: 'customerId',
-        }, {
             title: '邮箱',
             dataIndex: 'email',
         }, {
@@ -86,29 +74,28 @@ export default class WorkGroup extends PureComponent {
             visible: false,
             activeKey: '1',
             data: [],
-            checked:[],
-            set:new Set(),
-            roadId:'',
-            teamWorkerData:[],
-            teamWorkerId:[],
-            teamWorkerName:[],
-            bol:true,
-            zebracrossingId:0,
+            checked: [],
+            set: new Set(),
+            roadId: '',
+            teamWorkerData: [],
+            teamWorkerId: [],
+            teamWorkerName: [],
+            bol: true,
+            zebracrossingId: 0,
             // fields: {
             //     workerId: '',
             //     workerName: '',
             //     zebracrossingId: '1',
             //     id:1,
             // },
-            fields:{},
+            fields: {},
         }
     };
 
 
     componentWillMount() {
         const { zebracrossingId } = this.props;
-        console.log("componentWillMount");
-        console.log(zebracrossingId);
+       
         this.state.zebracrossingId = zebracrossingId;
         this.getInitial();
         this.getGroupInfo({ zebracrossingId });
@@ -121,21 +108,18 @@ export default class WorkGroup extends PureComponent {
         }
     }
 
-    getInitial(){
+    getInitial() {
         this.token = getToken();
-        // console.log("getToken");
-        // console.log(this.token.session);
+         
         this.session = this.token.session;
         this.account = this.token.account;
         this.customerId = this.token.customerId;
-        // console.log(this.token);
+       
     };
     //拿到施工人员列表
-    getTeamList(){
-        servers.getTeamList({customerId:this.customerId}).then(res => {
+    getTeamList() {
+        servers.getTeamList({ customerId: this.customerId }).then(res => {
             if (res.result == 200) {
-                console.log("getTeamList");
-                console.log(res.data);
                 res.data ? this.setState({ teamWorkerData: res.data }) : this.setState({ teamWorkerData: [] });
             } else {
                 const args = {
@@ -151,9 +135,9 @@ export default class WorkGroup extends PureComponent {
 
     };
     //初始化表格
-    getGroupInfo=(zebracrossingId)=>{
-        servers.getRoadWorkerList( zebracrossingId).then(res => {
-            
+    getGroupInfo = (zebracrossingId) => {
+        servers.getRoadWorkerList(zebracrossingId).then(res => {
+
             if (res.result == 200) {
                 res.data ? this.setState({ data: res.data }) : this.setState({ data: [] });
                 // console.log(this.state.data);
@@ -176,7 +160,7 @@ export default class WorkGroup extends PureComponent {
         this.setState({
             visible: true,
         });
-        console.log("showModal");
+       
         // console.log(this.state.teamWorkerId);
     };
 
@@ -188,11 +172,11 @@ export default class WorkGroup extends PureComponent {
         });
         // console.log(this.state.teamWorkerId);
         let zebracrossingId = this.state.zebracrossingId;
-        for(let i =0;this.state.teamWorkerId.length>i; i++ ){
-            servers.addRoadWorkInfo({zebracrossingId:zebracrossingId,workerId:this.state.teamWorkerId[i],workerName:this.state.teamWorkerName[i]}).then(res => {
+        for (let i = 0; this.state.teamWorkerId.length > i; i++) {
+            servers.addRoadWorkInfo({ zebracrossingId: zebracrossingId, workerId: this.state.teamWorkerId[i], workerName: this.state.teamWorkerName[i] }).then(res => {
                 // i++;
                 let { result, message } = res;
-               
+
                 if (result == 200) {
                     // console.log(2);
                     // console.log(result);
@@ -203,7 +187,7 @@ export default class WorkGroup extends PureComponent {
                         duration: 2,
                     };
                     notification.success(args);
-                    this.getGroupInfo({zebracrossingId});
+                    this.getGroupInfo({ zebracrossingId });
                 } else {
                     const args = {
                         message: '提交失败',
@@ -226,8 +210,8 @@ export default class WorkGroup extends PureComponent {
     };
 
     handleDelete = (record) => {
-        console.log(record);
-        let _this =this;
+       
+        let _this = this;
         confirm({
             title: "你确认删除施工单",
             // content: record.content,
@@ -237,7 +221,7 @@ export default class WorkGroup extends PureComponent {
             onOk() {
                 let { id } = record;
                 console.log(id);
-                servers.deleteRoadWorkerInfo({id}).then(res=>{
+                servers.deleteRoadWorkerInfo({ id }).then(res => {
                     if (res.result == 200) {
                         const args = {
                             message: '删除成功',
@@ -254,9 +238,9 @@ export default class WorkGroup extends PureComponent {
                         };
                         notification.error(args);
                     }
-                    let  zebracrossingId  = _this.state.zebracrossingId ;
-                    _this.getGroupInfo({zebracrossingId:zebracrossingId});
-                }).catch(e=>{console.log(e)})
+                    let zebracrossingId = _this.state.zebracrossingId;
+                    _this.getGroupInfo({ zebracrossingId: zebracrossingId });
+                }).catch(e => { console.log(e) })
             },
             onCancel() {
                 console.log('Cancel');
@@ -266,31 +250,31 @@ export default class WorkGroup extends PureComponent {
 
 
     //render函数
-    render(){
+    render() {
         //selectedRows数组
         const rowSelection = {
             onChange: (selectedRowKeys, selectedRows) => {
-                
-                    selectedRows.map((item) => {
-                        this.state.teamWorkerId.push(item.workerId);
-                        this.state.teamWorkerName.push(item.workerName);
-                        return null;
-                    });
-                
 
-                },  // onSelect
+                selectedRows.map((item) => {
+                    this.state.teamWorkerId.push(item.workerId);
+                    this.state.teamWorkerName.push(item.workerName);
+                    return null;
+                });
 
-                getCheckboxProps: record => ({
-                    disabled: record.name === 'Disabled User', // Column configuration not to be checked
-                    name: record.name,
-                })
+
+            },  // onSelect
+
+            getCheckboxProps: record => ({
+                disabled: record.name === 'Disabled User', // Column configuration not to be checked
+                name: record.name,
+            })
 
 
         };
 
         return (
-            <div style={{marginTop:10 }}>
-                    <div style={{float:'right',marginBottom:5,heigth:100}}>
+            <div style={{ marginTop: 10 }}>
+                <div style={{ float: 'right', marginBottom: 5, heigth: 100 }}>
                     <Button type="primary" onClick={this.showModal}>添加施工人员</Button>
                     <Modal
                         width={1400}
@@ -299,12 +283,11 @@ export default class WorkGroup extends PureComponent {
                         onOk={this.handleSubmit}
                         onCancel={this.handleCancel}
                     >
-                        <Table rowSelection={rowSelection} dataSource={this.state.teamWorkerData} columns={this.workerColumns}/>
+                        <Table rowSelection={rowSelection} dataSource={this.state.teamWorkerData} columns={this.workerColumns} />
                     </Modal>
-                  </div>
-
-                <div style ={{float:'right',heigth:100, width:'100%' }}>
-                    <Table  dataSource={this.state.data} columns={this.columns} />
+                </div>
+                <div style={{ float: 'right', heigth: 100, width: '100%' }}>
+                    <Table dataSource={this.state.data} columns={this.columns} />
                 </div>
             </div>
         );

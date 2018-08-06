@@ -1,51 +1,72 @@
 import React, { PureComponent } from 'react';
-import { Form, Input, Tooltip, Icon,  Button, Upload , DatePicker, Spin, Popconfirm } from 'antd';
+import { connect } from 'react-redux'
+import { Form, Input, Button, notification, Popconfirm, DatePicker, Spin } from 'antd';
 import servers from '@/server'
 import Ueditor from '../../../common/Ueditor'
 import UploadImg from '@/common/UploadImg'
+import moment from 'moment';
 
 const FormItem = Form.Item;
-const { TextArea } = Input;
 
 
-class RegistrationForm extends PureComponent {
+
+class workForm extends PureComponent {
     constructor(props) {
-        console.log("props");
-        console.log(props);
         super(props);
-        this.state={
-            action:'',
-            url:'',
-            fileList:[
-                {
-                    uid: -1,
-                    name:'',
-                    url:'',
-                }],
+        this.state = {
+            subLoading: false,
+            delLoading: false,
+            isAdd: false,
         }
     }
 
-    handleSubmit = (e) =>{
+    handleSubmit = (e) => {
         e.preventDefault();
         this.props.form.validateFieldsAndScroll((err, values) => {
-            console.log("form--values");
-            console.log(values);
             if (!err) {
-                let { modifyDayWorkRecoder } = this.props;
-                modifyDayWorkRecoder(values);
+                const { zebracrossingId, id } = this.props;
+                values = {
+                    ...values,
+                    'Action': id ? 1 : 0,
+                    'zebracrossingId': zebracrossingId,
+                    'workDate': values.workDate.format('YYYY-MM-DD HH:mm:ss')
+                }
+                if (id) values.id = id;
+                this.setState({ subLoading: true })
+                servers.modifyDayWorkRecoder(values).then(res => {
+                    this.setState({ subLoading: false })
+                })
             }
         });
-    };
+    }
+    handleDelete = () => {
+        const { id } = this.props;
+        servers.delDayWorkRecoder({ id }).then(res => {
+            if (res.result == 200) {
+                const args = {
+                    message: '删除成功',
+                    description: res.message,
+                    duration: 2,
+                };
+                notification.success(args);
+                // _this.setState({ activeKey: '1' });
+            } else {
+                const args = {
+                    message: '删除失败',
+                    description: res.message,
+                    duration: 2,
+                };
+                notification.error(args);
+            }
 
-    onChange = (date, dateString) =>{
-        console.log(date, dateString);
-    };
-
-    render(){
-        const { operate, content, id ,customId, imgUuid } = this.props;
-        const account = this.props.account;
-        const { isLoading } = this.props;
+        }).catch(e => { console.log(e) })
+    }
+    render() {
+        const { operate, content, id, imgUuid, account, workDate, isLoading } = this.props;
         const { getFieldDecorator } = this.props.form;
+        const { isAdd } = this.state;
+        let initOperate = operate || account;
+
         const formItemLayout = {
             labelCol: {
                 xs: { span: 24 },
@@ -59,118 +80,83 @@ class RegistrationForm extends PureComponent {
         const tailFormItemLayout = {
             wrapperCol: {
                 xs: {
-                    span: 24,
+                    span: 14,
                     offset: 0,
                 },
                 sm: {
                     span: 16,
-                    offset: 8,
+                    offset: 0,
                 },
             },
         };
+        return (
+            <Form>
+                <FormItem
+                    {...formItemLayout}
+                    label="记录人"
+                >
+                    {getFieldDecorator('operate', {
+                        rules: [],
+                        initialValue: initOperate
+                    })(
+                        <Input style={{ width: '100%' }} disabled />
+                    )}
+                </FormItem>
 
-        const uploadButton = (
-            <div>
-                <Button >
-                    <Icon type="upload" /> 上传
-                    {/*<div className="ant-upload-text">Upload</div>*/}
-                </Button>
-            </div>
-        );
-
-        return(
-
-            <div style={{marginTop:1 ,height:'100%'}}>
-
-                <h1 style={{align:'center'}}>施工单</h1>
-                {isLoading ? <Spin /> :
-                    <Form>
-                        <FormItem
-                            {...formItemLayout}
-                            label="记录人"
-                        >
-                            {getFieldDecorator('account', {
-                                rules: [],
-                                initialValue: account
-                            })(
-                                <Input style={{ width: '100%' }} disabled />
-                            )}
-                        </FormItem>
-                        <FormItem
-                            {...formItemLayout}
-                            label="用户ID"
-                        >
-                            {getFieldDecorator('customId', {
-                                rules: [{
-                                    required: true, message: '请输入用户ID',
-                                }],
-                                initialValue: customId
-                            })(
-                                <Input style={{ width: '100%' }} disabled/>
-                            )}
-                        </FormItem>
-                        <FormItem
-                            {...formItemLayout}
-                            label="操作"
-                        >
-                            {getFieldDecorator('operate', {
-                                rules: [{
-                                    required: true, message: '请输入勘察人员',
-                                }],
-                                initialValue: operate
-                            })(
-                                <Input style={{ width: '100%' }} />
-                            )}
-                        </FormItem>
-
-
-                        <FormItem
-                            {...formItemLayout}
-                            label="勘察内容"
-                        >
-                            {getFieldDecorator('content', {
-                                rules: [{ required: true, message: '请输入勘察内容', whitespace: true }],
-                                initialValue: content,
-                            })(
-                                <Ueditor />
-                            )}
-                        </FormItem>
-                        <FormItem
-                            {...tailFormItemLayout}
-                        >
-                            <UploadImg imgUuid={imgUuid} title="施工图片上传" />
-                        </FormItem>
-                        <FormItem {...tailFormItemLayout}>
-                            <Button type='primary' onClick={(e) => { this.handleSubmit(e) }} style={{ marginRight: 8 }} loading={this.state.subLoading}> 提交</Button>
-                            <Popconfirm title="确定删除" onConfirm={() => this.handleDelete()}>
-                                <Button type="primary" loading={this.state.delLoading} disabled={!id}>删除</Button>
-                            </Popconfirm>
-                        </FormItem>
-                    </Form>}
-
-            </div>
+                <FormItem
+                    {...formItemLayout}
+                    label="施工日期"
+                >
+                    {getFieldDecorator('workDate', {
+                        rules: [{
+                            required: true, message: '请输入施工日期',
+                        }],
+                        initialValue: workDate ? moment(workDate) : moment()
+                    })(
+                        <DatePicker
+                            showTime
+                            format='YYYY-MM-DD HH:mm:ss'
+                            style={{ width: '100%' }} />
+                    )}
+                </FormItem>
+                <FormItem
+                    {...formItemLayout}
+                    label="勘察内容"
+                >
+                    {getFieldDecorator('content', {
+                        rules: [{ required: true, message: '请输入勘察内容', whitespace: true }],
+                        initialValue: content,
+                    })(
+                        <Ueditor />
+                    )}
+                </FormItem>
+                <FormItem
+                    {...tailFormItemLayout}
+                >
+                    <UploadImg imgUuid={imgUuid} title="施工图片上传" />
+                </FormItem>
+                <FormItem {...tailFormItemLayout}>
+                    <Button type='primary' onClick={(e) => { this.handleSubmit(e) }} style={{ marginRight: 8 }} loading={this.state.subLoading}> 提交</Button>
+                    <Popconfirm title="确定删除" onConfirm={() => this.handleDelete()}>
+                        <Button type="primary" loading={this.state.delLoading} disabled={!id}>删除</Button>
+                    </Popconfirm>
+                </FormItem>
+            </Form>
         );
     }
 }
 
 // const WorkBillForm = Form.create({})(RegistrationForm);
 
-const WorkBillForm = Form.create({
-    onFieldsChange(props, changedFields) {
-        props.onChange(changedFields);
-    },
-    mapPropsToFields(props) {
-        let cusProps = {};
-        for (var k in props) {
-            cusProps[k] = Form.createFormField({
-                ...props[k],
-                value: props[k].value,
-            })
-        }
-        return cusProps;
+const mapState = (state) => {
+    return {
+        account: state.auth.user.account,
     }
-})(RegistrationForm);
+}
+
+const WorkForm = Form.create()(workForm);
 
 
+export default connect(mapState)(WorkForm)
 
-export default WorkBillForm;
+
